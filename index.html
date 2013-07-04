@@ -20,7 +20,14 @@ var forEachPolyfill = (function(){
 	}
 })();
 
-var Phone = (function(){
+/*
+* Progressive Enhancement Basic Functionality
+* Author: Adrian Zumbrunnen
+* www.ia.net
+**/
+
+var mobiCheck = (function(){
+	var self = this;
 	var device,
 		initialize,
 		userAgents,
@@ -64,6 +71,7 @@ var Phone = (function(){
 	featureMatrix.fixed = {};
 	featureMatrix.fixed['ios'] = 5;
 	featureMatrix.fixed['android'] = 3;
+	featureMatrix.fixed['iemobile'] = 8;
 
 	methods = {
 		feature: {
@@ -86,22 +94,30 @@ var Phone = (function(){
 					var startIndex = agent.indexOf( 'OS ' );
 					var version = agent.substr(startIndex + 3, 3).replace('_', '.');
 					return parseFloat(version);
-				case 'blackberry': 	document.body.innerHTML = 'blackberry'; break;
 				case 'android':
 					var startIndex = agent.indexOf( 'Android ' );
 					var version = agent.substr(startIndex + 8, 3);
 					return parseFloat(version);
 				case 'iemobile':
-					var startIndex = agent.indexOf( 'Windows Phone OS ' );
-					var version = agent.substr(startIndex + 17, 3);
+					var startIndex = agent.indexOf( 'Windows Phone ' );
+					var version = agent.substr(startIndex + 14, 3);
 					return parseFloat(version);
 			}
+		},
+		setClasses: function(){
+			var currentClass = document.body.className;
+			if ( !methods.feature.fixed() ) document.body.className = currentClass.replace('fixed', ' ');
 		}
 	};
 	return {
 		init: function(){
 			methods.getAgent();
+			methods.setClasses();
+			console.log('mobile-check initialized');
 		}(),
+		setClasses: function(){
+
+		},
 		hasFeature: function(f){
 			try {
 				if (!methods.feature[f] == "function") { throw "invalid feature"; } else {
@@ -110,12 +126,8 @@ var Phone = (function(){
 			} catch (e){
 				console.log(e);
 			}
-		},
-		getAgent: methods.getAgent
+		}	
 	}
 })();
-
-Phone.hasFeature('fixed');
-//document.body.innerHTML = navigator.userAgent;
 </script>
 </html>
