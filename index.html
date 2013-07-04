@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Position Fixed Sniffer</title>
+</head>
+<body>
+	
+</body>
+
+<script>
+
+var forEachPolyfill = (function(){
+	if ( !Array.prototype.forEach ) {
+	  Array.prototype.forEach = function(fn, scope) {
+	    for(var i = 0, len = this.length; i < len-1; ++i) {
+	      fn.call(scope, this[i], i, this);
+	    }
+	  };
+	}
+})();
+
+var Phone = (function(){
+	var device,
+		initialize,
+		userAgents,
+		featureMatrix,
+		methods;
+	
+	device = {
+		'os': 'unknown',
+		'ver': 'unknown'
+	};
+	
+	initialize = (function(){
+		methods.getAgent();
+	});
+
+
+	userAgents = [
+		{ 
+			name: "android",
+			reg: /Android/i
+		},
+		{ 
+			name: 'blackberry',
+			reg: /BlackBerry/i
+		},
+		{ 
+			name: 'ios',
+			reg: /iPhone|iPad|iPod/i
+		},
+		{ 
+			name: 'opera',
+			reg: /Opera Mini/i
+		},
+		{ 
+			name: 'iemobile',
+			reg: /IEMobile/i
+		}
+	];
+
+	featureMatrix = {};
+	featureMatrix.fixed = {};
+	featureMatrix.fixed['ios'] = 5;
+	featureMatrix.fixed['android'] = 3;
+
+	methods = {
+		feature: {
+			fixed: function(){
+				return (device.ver >= featureMatrix.fixed[device.os]) ? true : false;
+			}
+		},
+		getAgent: function(){
+			userAgents.forEach(function(agent){
+				if (navigator.userAgent.match(agent.reg)){
+					device.os = agent.name;
+					device.ver = methods.getVersion(device.os);
+				}
+			});
+		},
+		getVersion: function(os){
+			var agent = navigator.userAgent;
+			switch (os){
+				case 'ios':
+					var startIndex = agent.indexOf( 'OS ' );
+					var version = agent.substr(startIndex + 3, 3).replace('_', '.');
+					return parseFloat(version);
+				case 'blackberry': 	document.body.innerHTML = 'blackberry'; break;
+				case 'android':
+					var startIndex = agent.indexOf( 'Android ' );
+					var version = agent.substr(startIndex + 8, 3);
+					return parseFloat(version);
+				case 'iemobile':
+					var startIndex = agent.indexOf( 'Windows Phone OS ' );
+					var version = agent.substr(startIndex + 17, 3);
+					return parseFloat(version);
+			}
+		}
+	};
+	return {
+		init: function(){
+			methods.getAgent();
+		}(),
+		hasFeature: function(f){
+			try {
+				if (!methods.feature[f] == "function") { throw "invalid feature"; } else {
+					return methods.feature[f]();
+				}
+			} catch (e){
+				console.log(e);
+			}
+		},
+		getAgent: methods.getAgent
+	}
+})();
+
+Phone.hasFeature('fixed');
+//document.body.innerHTML = navigator.userAgent;
+</script>
+</html>
